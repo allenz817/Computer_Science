@@ -5,7 +5,8 @@ def run_game():
     # ask the player to input the length of word
     while True:
         try: word_length = int(input("Please input the length of word: "))
-        except ValueError: print("Please enter an integer")
+        # except ValueError: print("Please enter an integer")
+        except ValueError: pass
         else: break
     
     my_word_maker = word_maker()
