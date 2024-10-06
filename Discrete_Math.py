@@ -12,7 +12,7 @@ for n in range(2,1000000):
         break
 print (m)
 """
-
+"""
 def is_prime(num):
     if num < 2:
         return False
@@ -28,3 +28,13 @@ def euler_conjecture():
             print(f"Counterexample n = {n}, value = {value} is not prime.")
 
 euler_conjecture()
+"""
+
+count = 0
+for i in range(0,9999):
+    num_str = str(i)
+    count_1 = num_str.count('1')
+    count_3 = num_str.count('3')
+    if count_1 == 1 and count_3 == 1:
+        count += 1
+print (count)
