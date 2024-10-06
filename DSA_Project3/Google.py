@@ -8,7 +8,6 @@ class TrieDictionary(BoggleDictionary):
         self.root: TrieNode = TrieNode()
 
     def load_dictionary(self, filename: str) -> None:
-        # Read words from the file and add them to the trie
         with open(filename) as wordsfile:
             for line in wordsfile:
                 word = line.strip().lower()
@@ -38,9 +37,6 @@ class TrieDictionary(BoggleDictionary):
         return node is not None and node.is_word
 
     def __iter__(self) -> typing.Iterator[str]:
-        # Implement an iterator to yield all valid words in the trie
-        # You can use depth-first search (DFS) or any other traversal method
-        # to explore the trie and yield words.
         stack = [(self.root, "")]
 
         while stack:
