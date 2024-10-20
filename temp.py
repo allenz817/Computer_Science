@@ -1,6 +1,3 @@
-class Lion:
-    def __init__(self, name):
-        self.name = name
-
-lion = Lion("Dilbert")
-print(lion.name)
+from itertools import combinations_with_replacement
+for c in combinations_with_replacement("TBL", 4):
+    print("".join(c))

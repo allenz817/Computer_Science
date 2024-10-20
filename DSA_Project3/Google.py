@@ -1,9 +1,13 @@
+import typing
+from typing import Optional, Dict, Set
+from collections.abc import Iterator
+
 class TrieNode:
     def __init__(self):
         self.children: Dict[str, TrieNode] = {}
         self.is_word = False
 
-class TrieDictionary(BoggleDictionary):
+class TrieDictionary():
     def __init__(self):
         self.root: TrieNode = TrieNode()
 
@@ -48,3 +52,24 @@ class TrieDictionary(BoggleDictionary):
             # Add child nodes to the stack
             for char, child_node in node.children.items():
                 stack.append((child_node, prefix + char))
+
+  
+WORDS_FILE = "words.txt"
+words: Set[str] = set()
+with open(WORDS_FILE, "r") as fin:
+    for line in fin:
+        line = line.strip().upper()
+        words.add(line)
+
+def test_contains_all_example():
+    #Test that the contains() returns True for all of the words specified in the dictionary file.
+
+    # make dictionary
+    #game_dict = trie_dictionary.TrieDictionary()
+    game_dict = TrieDictionary()
+    game_dict.load_dictionary(WORDS_FILE)
+
+    for s in words:
+        assert game_dict.contains(s)
+
+test_contains_all_example
