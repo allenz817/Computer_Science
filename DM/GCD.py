@@ -1,3 +1,5 @@
+# Tile a n * m area with same sized squares:
+
 def squares(n, m):
     def gcd(a ,b):
         while b != 0:
