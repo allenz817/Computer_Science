@@ -3,4 +3,5 @@ Theory and application of computer science:
 - Machine learning
 - Deep learning
 - Natural language processing
+- Reinforcement learning
 - and so on...
