@@ -1,0 +1,144 @@
+# ETF Analytics Platform - Quick Reference
+
+## Installation
+
+```bash
+cd ETF_Analytics
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+### Test Installation
+```bash
+python quick_test.py
+```
+
+### Run Examples
+```bash
+python example.py
+```
+
+### Basic Usage
+
+```python
+from etf_app import ETFAnalyzer
+
+# Initialize
+analyzer = ETFAnalyzer()
+
+# Analyze single ETF
+results = analyzer.analyze_etf('SPY', start_date='2023-01-01')
+analyzer.print_analysis_report(results)
+
+# Compare ETFs
+comparison = analyzer.compare_etfs(['SPY', 'QQQ', 'IWM'], start_date='2023-01-01')
+print(comparison)
+
+# Get correlation matrix
+corr = analyzer.get_correlation_matrix(['SPY', 'AGG', 'GLD'], start_date='2023-01-01')
+print(corr)
+```
+
+## Key Features
+
+### 1. Data Quality Validation
+- Multi-source cross-validation
+- Anomaly detection
+- Completeness checking
+- Quality scoring (A-F grades)
+
+### 2. ETF Metrics
+- Tracking error & tracking difference
+- Expense ratio analysis
+- Liquidity scoring
+- Beta calculation
+- Premium/discount to NAV
+
+### 3. Risk Analysis
+- Sharpe & Sortino ratios
+- Maximum drawdown
+- VaR & CVaR
+- Downside risk
+- Skewness & kurtosis
+
+### 4. Benchmark Comparison
+- Compare against SPY, QQQ, or custom benchmark
+- Correlation analysis
+- Performance attribution
+
+## Data Sources
+
+1. **Yahoo Finance** (primary) - Historical prices, ETF info
+2. **Alpha Vantage** (optional) - Validation, fundamental data
+3. **FRED** - Risk-free rates, market indices
+
+## Configuration
+
+Edit `config.py` to customize:
+- API keys
+- Quality thresholds
+- Risk-free rate
+- Cache settings
+
+## API Keys (Optional)
+
+**Alpha Vantage** (free): Get key at https://www.alphavantage.co/support/#api-key
+- Add to `config.py`: `ALPHA_VANTAGE_API_KEY = "your_key"`
+- Enable in analyzer: `ETFAnalyzer(use_alpha_vantage=True)`
+
+## Output Examples
+
+**Single ETF Analysis:**
+- Performance metrics (returns, volatility, Sharpe)
+- Risk metrics (VaR, drawdown, skewness)
+- Benchmark comparison (tracking error, beta)
+- Data quality score
+- Liquidity metrics
+
+**Multi-ETF Comparison:**
+- Side-by-side table of key metrics
+- Data quality grades
+- Expense ratios
+- Average trading volumes
+
+**Correlation Matrix:**
+- Cross-correlation between ETFs
+- Identifies diversification opportunities
+
+## Troubleshooting
+
+**No data returned:**
+- Check ticker symbol is correct
+- Verify internet connection
+- Try different date range
+
+**Rate limit errors (Alpha Vantage):**
+- Free tier: 25 calls/day
+- Use `use_alpha_vantage=False` (default)
+
+**Missing dependencies:**
+```bash
+pip install -r requirements.txt --upgrade
+```
+
+## Project Structure
+
+```
+ETF_Analytics/
+├── config.py              # Configuration settings
+├── etf_app.py            # Main application
+├── example.py            # Usage examples
+├── quick_test.py         # Installation test
+├── data_fetchers/        # Data source modules
+├── data_quality/         # Validation & scoring
+├── etf_analytics/        # ETF metrics & risk
+└── utils/                # Helper functions
+```
+
+## Next Steps
+
+1. ✓ Run `quick_test.py` to verify setup
+2. ✓ Run `example.py` to see capabilities
+3. ✓ Customize `config.py` for your needs
+4. ✓ Build your own analysis scripts!
