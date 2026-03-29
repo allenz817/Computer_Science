@@ -23,16 +23,21 @@ def test_basic_functionality():
     print("\n2. Fetching SPY data (last 30 days)...")
     try:
         start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-        data = analyzer.yahoo_fetcher.fetch_prices('SPY', start_date)
+        data_sources = analyzer.fetch_etf_data('SPY', start_date)
         
-        if not data.empty:
+        if data_sources:
+            data = list(data_sources.values())[0]
             print(f"   ✓ Successfully fetched {len(data)} days of data")
             print(f"   Latest close: ${data['Close'].iloc[-1]:.2f}")
         else:
             print("   ✗ No data returned")
+            print("   Note: You may need to configure API keys in config.py")
+            print("   - Alpha Vantage: Get free key at alphavantage.co")
+            print("   - IEX Cloud: Get free key at iexcloud.io")
             return False
     except Exception as e:
         print(f"   ✗ Failed to fetch data: {e}")
+        print("   Note: Configure API keys in config.py for data access")
         return False
     
     print("\n3. Testing data quality validation...")
@@ -41,19 +46,27 @@ def test_basic_functionality():
         validator = DataQualityValidator()
         
         end_date = datetime.now().strftime('%Y-%m-%d')
-        completeness = validator.validate_completeness(data, start_date, end_date)
-        print(f"   ✓ Completeness check passed")
-        print(f"   Data completeness: {completeness['completeness_pct']:.1%}")
+        if data_sources:
+            data = list(data_sources.values())[0]
+            completeness = validator.validate_completeness(data, start_date, end_date)
+            print(f"   ✓ Completeness check passed")
+            print(f"   Data completeness: {completeness['completeness_pct']:.1%}")
+        else:
+            print("   ⚠ Skipped (no data available)")
     except Exception as e:
         print(f"   ✗ Validation failed: {e}")
         return False
     
-    print("\n4. Testing ETF metrics calculation...")
-    try:
-        from etf_analytics import calculate_returns, risk_metrics_summary
-        
-        returns = calculate_returns(data['Adj Close'])
-        metrics = risk_metrics_summary(returns.dropna())
+    prinif data_sources:
+            data = list(data_sources.values())[0]
+            returns = calculate_returns(data['Adj Close'])
+            metrics = risk_metrics_summary(returns.dropna())
+            
+            print(f"   ✓ Metrics calculated successfully")
+            print(f"   Sharpe Ratio: {metrics['sharpe_ratio']:.2f}")
+            print(f"   Max Drawdown: {metrics['max_drawdown']:.2%}")
+        else:
+            print("   ⚠ Skipped (no data available)
         
         print(f"   ✓ Metrics calculated successfully")
         print(f"   Sharpe Ratio: {metrics['sharpe_ratio']:.2f}")

@@ -7,6 +7,18 @@ cd ETF_Analytics
 pip install -r requirements.txt
 ```
 
+**Important: Get Free API Keys**
+
+Alpha Vantage (required for price data):
+1. Visit https://www.alphavantage.co/support/#api-key
+2. Get your free API key (25 calls/day, or upgrade to 500/day for $50/month)
+3. Add to `config.py`: `ALPHA_VANTAGE_API_KEY = "your_key_here"`
+
+IEX Cloud (optional for validation):
+1. Visit https://iexcloud.io/console/
+2. Get free tier (50,000 messages/month)
+3. Add to `config.py`: `IEX_CLOUD_API_KEY = "your_key_here"`
+
 ## Quick Start
 
 ### Test Installation
@@ -69,9 +81,18 @@ print(corr)
 
 ## Data Sources
 
-1. **Yahoo Finance** (primary) - Historical prices, ETF info
-2. **Alpha Vantage** (optional) - Validation, fundamental data
+1. **Alpha Vantage (Primary)** - Historical OHLCV, fundamentals
+   - Free tier: 25 API calls/day
+   - Premium: 500 calls/day ($50/month)
+   - Required for basic functionality
+
+2. **IEX Cloud (Secondary)** - Price validation, company info
+   - Free tier: 50,000 messages/month
+   - Optional but recommended for cross-validation
+
 3. **FRED** - Risk-free rates, market indices
+   - No API key required
+   - Used for benchmark data
 
 ## Configuration
 
@@ -100,18 +121,18 @@ Edit `config.py` to customize:
 - Side-by-side table of key metrics
 - Data quality grades
 - Expense ratios
-- Average trading volumes
+- AveragAPI keys are configured in `config.py`
+- Verify ticker symbol is correct
+- Check you haven't exceeded rate limits (25/day for Alpha Vantage free tier)
 
-**Correlation Matrix:**
-- Cross-correlation between ETFs
-- Identifies diversification opportunities
+**Rate limit errors (Alpha Vantage):**
+- Free tier: 25 calls/day
+- Wait until next day or upgrade to premium
+- Use demo key for testing (very limited)
 
-## Troubleshooting
-
-**No data returned:**
-- Check ticker symbol is correct
-- Verify internet connection
-- Try different date range
+**IEX Cloud not working:**
+- It's optional - platform works without it
+- Disable: `analyzer = ETFAnalyzer(use_iex=False)Try different date range
 
 **Rate limit errors (Alpha Vantage):**
 - Free tier: 25 calls/day

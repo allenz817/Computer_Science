@@ -4,23 +4,23 @@ Configuration settings for ETF Analytics application
 
 # API Keys (set these as environment variables or update here)
 ALPHA_VANTAGE_API_KEY = "demo"  # Get free key at alphavantage.co
-IEX_CLOUD_API_KEY = None  # Optional: Get free key at iexcloud.io
+IEX_CLOUD_API_KEY = None  # Get free key at iexcloud.io (50k messages/month free)
 
 # Data Source Configuration
 DATA_SOURCES = {
-    'yfinance': {
-        'enabled': True,
-        'priority': 1,  # Primary source
-        'rate_limit': None
-    },
     'alpha_vantage': {
         'enabled': True,
-        'priority': 2,  # Validation source
-        'rate_limit': 25  # calls per day
+        'priority': 1,  # Primary source
+        'rate_limit': 25  # calls per day (500 for premium)
+    },
+    'iex_cloud': {
+        'enabled': True,
+        'priority': 2,  # Secondary/validation source
+        'rate_limit': None  # 50k messages/month free tier
     },
     'fred': {
         'enabled': True,
-        'priority': 1,
+        'priority': 1,  # For benchmarks and risk-free rates
         'rate_limit': None
     }
 }

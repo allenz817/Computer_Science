@@ -12,15 +12,24 @@ A prototype application for analyzing ETF data with focus on data quality and re
 
 ## Data Sources
 
-1. **yfinance**: Historical price data (primary)
-2. **Alpha Vantage**: Price validation and fundamentals
-3. **FRED**: Risk-free rates and benchmark indices
-4. **SEC EDGAR**: Holdings data (future enhancement)
+1. **Alpha Vantage** (primary) - Historical prices, fundamentals
+2. **IEX Cloud** (secondary) - Validation, current quotes  
+3. **FRED** - Risk-free rates and benchmark indices
 
 ## Installation
 
 ```bash
 pip install -r requirements.txt
+```
+
+**Get Free API Keys:**
+- **Alpha Vantage**: https://www.alphavantage.co/support/#api-key (required)
+- **IEX Cloud**: https://iexcloud.io/console/ (optional, 50k messages/month free)
+
+Add keys to [config.py](config.py):
+```python
+ALPHA_VANTAGE_API_KEY = "your_key_here"
+IEX_CLOUD_API_KEY = "your_key_here"  # optional
 ```
 
 ## Quick Start
@@ -46,9 +55,9 @@ optimal_weights = analyzer.optimize_portfolio(['SPY', 'AGG', 'GLD'])
 ```
 ETF_Analytics/
 ├── data_fetchers/      # Data collection from various sources
-├── data_quality/       # Validation and quality checks
-├── etf_analytics/      # ETF-specific analysis functions
-├── portfolio/          # Portfolio optimization and risk analysis
+├─**API Rate Limits**: Alpha Vantage free tier = 25 calls/day (500 for premium)
+- **Data History**: Free tiers may have limited historical data
+- **Holdings Data**: Requires manual SEC filing downloads (not yet implemented) risk analysis
 ├── utils/              # Helper functions
 ├── etf_app.py          # Main application
 └── example.py          # Usage examples

@@ -14,8 +14,8 @@ def test_imports():
     modules_to_test = [
         ('config', 'Configuration'),
         ('data_fetchers', 'Data Fetchers'),
-        ('data_fetchers.yahoo_finance', 'Yahoo Finance Fetcher'),
         ('data_fetchers.alpha_vantage', 'Alpha Vantage Fetcher'),
+        ('data_fetchers.iex_cloud', 'IEX Cloud Fetcher'),
         ('data_fetchers.fred', 'FRED Fetcher'),
         ('data_quality', 'Data Quality Validator'),
         ('etf_analytics', 'ETF Analytics'),

@@ -4,7 +4,7 @@ Main ETF Analyzer Application
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from data_fetchers import YahooFinanceFetcher, AlphaVantageFetcher, FREDFetcher
+from data_fetchers import AlphaVantageFetcher, IEXCloudFetcher, FREDFetcher
 from data_quality import DataQualityValidator
 from etf_analytics import *
 import warnings
@@ -17,26 +17,28 @@ class ETFAnalyzer:
     Aggregates data from multiple sources and performs comprehensive analysis
     """
     
-    def __init__(self, alpha_vantage_key=None, use_alpha_vantage=False):
+    def __init__(self, alpha_vantage_key=None, iex_cloud_key=None, use_iex=True):
         """
         Initialize analyzer with data sources
         
         Parameters:
         -----------
         alpha_vantage_key : str, optional
-            Alpha Vantage API key
-        use_alpha_vantage : bool
-            Whether to use Alpha Vantage for validation (default False due to rate limits)
+            Alpha Vantage API key (get free at alphavantage.co)
+        iex_cloud_key : str, optional
+            IEX Cloud API key (get free at iexcloud.io)
+        use_iex : bool
+            Whether to use IEX Cloud for validation (default True)
         """
-        self.yahoo_fetcher = YahooFinanceFetcher()
+        self.alpha_fetcher = AlphaVantageFetcher(alpha_vantage_key)
         self.fred_fetcher = FREDFetcher()
         self.validator = DataQualityValidator()
         
-        self.use_alpha_vantage = use_alpha_vantage
-        if use_alpha_vantage:
-            self.alpha_fetcher = AlphaVantageFetcher(alpha_vantage_key)
+        self.use_iex = use_iex
+        if use_iex:
+            self.iex_fetcher = IEXCloudFetcher(iex_cloud_key)
         else:
-            self.alpha_fetcher = None
+            self.iex_fetcher = None
         
         self.cache = {}
     
@@ -55,21 +57,26 @@ class ETFAnalyzer:
         
         data_sources = {}
         
-        # Primary source: Yahoo Finance
-        print(f"  - Fetching from Yahoo Finance...")
-        yahoo_data = self.yahoo_fetcher.fetch_prices(ticker, start_date, end_date)
-        if not yahoo_data.empty:
-            data_sources['Yahoo Finance'] = yahoo_data
+        # Primary source: Alpha Vantage
+        print(f"  - Fetching from Alpha Vantage...")
+        try:
+            alpha_data = self.alpha_fetcher.fetch_prices(ticker, start_date, end_date)
+            if not alpha_data.empty:
+                data_sources['Alpha Vantage'] = alpha_data
+                print(f"    ✓ Got {len(alpha_data)} days of data")
+        except Exception as e:
+            print(f"    Warning: Alpha Vantage fetch failed: {e}")
         
-        # Validation source: Alpha Vantage (if enabled)
-        if self.use_alpha_vantage and self.alpha_fetcher:
-            print(f"  - Fetching from Alpha Vantage...")
+        # Secondary source: IEX Cloud (if enabled)
+        if self.use_iex and self.iex_fetcher:
+            print(f"  - Fetching from IEX Cloud...")
             try:
-                av_data = self.alpha_fetcher.fetch_prices(ticker, start_date, end_date)
-                if not av_data.empty:
-                    data_sources['Alpha Vantage'] = av_data
+                iex_data = self.iex_fetcher.fetch_prices(ticker, start_date, end_date)
+                if not iex_data.empty:
+                    data_sources['IEX Cloud'] = iex_data
+                    print(f"    ✓ Got {len(iex_data)} days of data")
             except Exception as e:
-                print(f"    Warning: Alpha Vantage fetch failed: {e}")
+                print(f"    Warning: IEX Cloud fetch failed: {e}")
         
         return data_sources
     
@@ -98,8 +105,8 @@ class ETFAnalyzer:
         if not data_sources:
             raise ValueError(f"No data available for {ticker}")
         
-        # Use primary source (Yahoo Finance)
-        primary_data = data_sources.get('Yahoo Finance', list(data_sources.values())[0])
+        # Use primary source (Alpha Vantage or first available)
+        primary_data = data_sources.get('Alpha Vantage', list(data_sources.values())[0])
         
         # Data quality validation
         print(f"\nValidating data quality...")
@@ -127,40 +134,46 @@ class ETFAnalyzer:
         risk_metrics = risk_metrics_summary(returns.dropna())
         
         # Fetch ETF info
-        etf_info = self.yahoo_fetcher.fetch_info(ticker)
+        etf_info = self.alpha_fetcher.fetch_info(ticker)
+        if not etf_info or etf_info.get('name') == ticker:
+            # Try IEX Cloud if Alpha Vantage didn't work
+            if self.use_iex and self.iex_fetcher:
+                etf_info = self.iex_fetcher.fetch_info(ticker)
         
         # Benchmark comparison
         benchmark_analysis = None
         if benchmark and benchmark != ticker:
             try:
-                benchmark_data = self.yahoo_fetcher.fetch_prices(
-                    benchmark, start_date, end_date
-                )
-                if not benchmark_data.empty:
-                    benchmark_returns = calculate_returns(benchmark_data['Adj Close'])
+                # Try to get benchmark data from primary source
+                benchmark_data_sources = self.fetch_etf_data(benchmark, start_date, end_date)
+                if benchmark_data_sources:
+                    benchmark_data = list(benchmark_data_sources.values())[0]
                     
-                    # Align returns
-                    aligned_returns = pd.DataFrame({
-                        'etf': returns,
-                        'benchmark': benchmark_returns
-                    }).dropna()
-                    
-                    benchmark_analysis = {
-                        'benchmark_ticker': benchmark,
-                        'tracking_error': tracking_error(
-                            aligned_returns['etf'], 
-                            aligned_returns['benchmark']
-                        ),
-                        'tracking_difference': tracking_difference(
-                            aligned_returns['etf'],
-                            aligned_returns['benchmark']
-                        ),
-                        'beta': calculate_beta(
-                            aligned_returns['etf'],
-                            aligned_returns['benchmark']
-                        ),
-                        'correlation': aligned_returns.corr().iloc[0, 1]
-                    }
+                    if not benchmark_data.empty:
+                        benchmark_returns = calculate_returns(benchmark_data['Adj Close'])
+                        
+                        # Align returns
+                        aligned_returns = pd.DataFrame({
+                            'etf': returns,
+                            'benchmark': benchmark_returns
+                        }).dropna()
+                        
+                        benchmark_analysis = {
+                            'benchmark_ticker': benchmark,
+                            'tracking_error': tracking_error(
+                                aligned_returns['etf'], 
+                                aligned_returns['benchmark']
+                            ),
+                            'tracking_difference': tracking_difference(
+                                aligned_returns['etf'],
+                                aligned_returns['benchmark']
+                            ),
+                            'beta': calculate_beta(
+                                aligned_returns['etf'],
+                                aligned_returns['benchmark']
+                            ),
+                            'correlation': aligned_returns.corr().iloc[0, 1]
+                        }
             except Exception as e:
                 print(f"  Warning: Benchmark analysis failed: {e}")
         
@@ -254,10 +267,13 @@ class ETFAnalyzer:
         
         for ticker in tickers:
             try:
-                data = self.yahoo_fetcher.fetch_prices(ticker, start_date, end_date)
-                if not data.empty:
-                    returns = calculate_returns(data['Adj Close'])
-                    returns_dict[ticker] = returns
+                # Fetch data for correlation
+                data_sources = self.fetch_etf_data(ticker, start_date, end_date)
+                if data_sources:
+                    data = list(data_sources.values())[0]
+                    if not data.empty:
+                        returns = calculate_returns(data['Adj Close'])
+                        returns_dict[ticker] = returns
             except Exception as e:
                 print(f"  Warning: Could not fetch {ticker}: {e}")
         
