@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Postings Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Job Postings Tracker</h1>
+            <p>Collect jobs by keyword and location, then review everything in one place.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Collect New Jobs</h2>
+            <form action="/collect" method="post" class="form-grid">
+                <label>
+                    Keywords (comma-separated)
+                    <input name="keywords" value="{{ keywords or default_keywords }}" />
+                </label>
+                <label>
+                    Location
+                    <input name="location" value="{{ location or default_location }}" />
+                </label>
+                <button type="submit">Run Collection</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Filter Results</h2>
+            <form action="/" method="get" class="form-grid">
+                <label>
+                    Keywords
+                    <input name="keywords" value="{{ keywords }}" placeholder="python,data,analyst" />
+                </label>
+                <label>
+                    Location
+                    <input name="location" value="{{ location }}" placeholder="United States" />
+                </label>
+                <button type="submit">Apply Filter</button>
+            </form>
+            <p class="count">Showing {{ job_count }} jobs</p>
+        </section>
+
+        <section class="panel">
+            <h2>Jobs</h2>
+            <div class="job-list">
+                {% for job in jobs %}
+                <article class="job-card">
+                    <header>
+                        <h3>{{ job.title }}</h3>
+                        <span class="pill">{{ job.source }}</span>
+                    </header>
+                    <p class="meta">{{ job.company }} | {{ job.location }}</p>
+                    <p class="small">Matched keyword: {{ job.matched_keyword or 'n/a' }}</p>
+                    <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer">Open posting</a>
+                </article>
+                {% else %}
+                <p>No jobs yet. Run a collection above.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
