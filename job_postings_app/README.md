@@ -6,6 +6,12 @@ A lightweight app that collects job postings based on keyword and location crite
 
 This MVP intentionally uses API-friendly/public sources to avoid violating LinkedIn restrictions. It is designed so you can add compliant integrations later.
 
+## Indeed and LinkedIn integration note
+
+- Indeed: possible via approved/official integrations (for example partner APIs). Direct scraping may violate platform terms and can be rate-limited or blocked.
+- LinkedIn: possible via official/approved LinkedIn products and partnerships. Direct scraping is heavily restricted and may trigger blocks or account risk.
+- Recommendation: only add these sources through authorized APIs and credentials.
+
 ## Features
 
 - Collect jobs by `keywords` and `location`
